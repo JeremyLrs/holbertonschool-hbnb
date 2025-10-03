@@ -1,3 +1,4 @@
+
 ```mermaid
 classDiagram
 
@@ -101,13 +102,13 @@ class Amenity {
 
   
 
-BaseProfile --|> User : Inheritance
+User --|> BaseProfile : Inheritance
 
-BaseProfile --|> Place : Inheritance
+Place  --|> BaseProfile : Inheritance
 
-BaseProfile --|> Review : Inheritance
+Review  --|> BaseProfile : Inheritance
 
-BaseProfile --|> Amenity : Inheritance
+Amenity --|> BaseProfile : Inheritance
 
 User --> Place : Association
 
