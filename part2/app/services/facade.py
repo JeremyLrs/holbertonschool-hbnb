@@ -5,6 +5,7 @@ from app.models.place import Place
 =======
 >>>>>>> e1eedec (Update user-related modules and services)
 from app.models.user import User
+from app.models.amenity import Amenity
 
 class HBnBFacade:
     def __init__(self):
@@ -12,6 +13,7 @@ class HBnBFacade:
         self.place_repo = InMemoryRepository()
         self.review_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
+        
 
     def create_user(self, user_data):
         user = User(**user_data)
@@ -106,3 +108,10 @@ class HBnBFacade:
 =======
 >>>>>>> e1eedec (Update user-related modules and services)
 facade = HBnBFacade()
+        amenity = self.amenity_repo.get(amenity_id)
+        if not amenity:
+            return None
+        for key, value in amenity_data.items():
+            setattr(amenity, key, value)
+        self.amenity_repo.update(amenity_id, amenity_data)
+        return amenity
