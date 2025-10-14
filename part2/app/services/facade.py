@@ -35,6 +35,8 @@ class HBnBFacade:
     # Placeholder for logic to update an amenity
         pass
 
+    # ---------- Place ---------- #
+
     def create_place(self, place_data):
     # Placeholder for logic to create a place, including validation for price, latitude, and longitude
         pass
