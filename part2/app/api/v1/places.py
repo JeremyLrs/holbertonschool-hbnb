@@ -1,6 +1,6 @@
 from flask_restx import Namespace, Resource, fields
-from app.services import facade
-
+from flask import request
+from app.services.facade import HBnBFacade
 api = Namespace('places', description='Place operations')
 
 # Define the models for related entities
@@ -27,6 +27,7 @@ place_model = api.model('Place', {
     'amenities': fields.List(fields.String, required=True, description="List of amenities ID's")
 })
 
+
 @api.route('/')
 class PlaceList(Resource):
     @api.expect(place_model)
@@ -34,14 +35,22 @@ class PlaceList(Resource):
     @api.response(400, 'Invalid input data')
     def post(self):
         """Register a new place"""
-        # Placeholder for the logic to register a new place
-        pass
+        data = request.get_json()
+        try:
+            new_place = HBnBFacade().create_place(data)
+            return new_place.to_dict(include_related=True), 201
+        except ValueError as e:
+            return {'error': str(e)}, 400
 
     @api.response(200, 'List of places retrieved successfully')
     def get(self):
         """Retrieve a list of all places"""
-        # Placeholder for logic to return a list of all places
-        pass
+        places = HBnBFacade().get_all_places()
+        result = []
+        for place in places:
+            result.append(place.to_dict(include_related=True))
+        return result, 200
+
 
 @api.route('/<place_id>')
 class PlaceResource(Resource):
@@ -49,8 +58,12 @@ class PlaceResource(Resource):
     @api.response(404, 'Place not found')
     def get(self, place_id):
         """Get place details by ID"""
-        # Placeholder for the logic to retrieve a place by ID, including associated owner and amenities
-        pass
+        place = HBnBFacade().get_place(place_id)
+        if not place:
+            return {
+                'error': f"The place with ID  {place_id} does not exist"
+                }, 404
+        return place.to_dict(include_related=True), 200
 
     @api.expect(place_model)
     @api.response(200, 'Place updated successfully')
@@ -58,5 +71,11 @@ class PlaceResource(Resource):
     @api.response(400, 'Invalid input data')
     def put(self, place_id):
         """Update a place's information"""
-        # Placeholder for the logic to update a place by ID
-        pass
+        data = request.get_json()
+        try:
+            updated_place = HBnBFacade().update_place(place_id, data)
+            return updated_place.to_dict(include_related=True), 200
+        except ValueError as e:
+            return {'error': str(e)}, 400
+        except KeyError as e:
+            return {'error': str(e)}, 404
