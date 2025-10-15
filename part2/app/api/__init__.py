@@ -1,3 +1,4 @@
+
 from flask import Blueprint
 from flask_restx import Api
 from app.api.v1.places import api as places_ns
