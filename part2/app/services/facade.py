@@ -1,6 +1,9 @@
 from app.persistence.repository import InMemoryRepository
+<<<<<<< HEAD
 from app.models.amenity import Amenity
 from app.models.place import Place
+=======
+>>>>>>> e1eedec (Update user-related modules and services)
 from app.models.user import User
 
 class HBnBFacade:
@@ -56,6 +59,7 @@ class HBnBFacade:
         self.amenity_repo.update(amenity_id, amenity_data)
         return amenity
 
+<<<<<<< HEAD
     # ---------- Place ---------- #
 
     def create_place(self, place_data):
@@ -99,4 +103,6 @@ class HBnBFacade:
         self.place_repo.update(place_id, place_data)
         return place
 
+=======
+>>>>>>> e1eedec (Update user-related modules and services)
 facade = HBnBFacade()
