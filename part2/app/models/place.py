@@ -5,7 +5,7 @@ from datetime import datetime
 class Place(BaseModel):
     def __init__(
             self, title, description, price, latitude,
-            longitude,owner, amenities=None):
+            longitude,owner_id, amenities=None):
         super().__init__()
 
         # main fields
@@ -15,10 +15,7 @@ class Place(BaseModel):
         self.latitude = float(latitude)
         self.longitude = float(longitude)
 
-        if owner:
-            self.owner = owner.id
-        else:
-            self.owner = None
+        self.owner_id = owner_id
 
         # Dates
         self.created_at = datetime.now()
@@ -83,7 +80,7 @@ class Place(BaseModel):
         if amenity not in self.amenities:
             self.amenities.append(amenity)
 
-    def to_dict(self):
+    def to_dict(self, include_related=False):
         return {
             "id": self.id,
             "title": self.title,
@@ -97,6 +94,7 @@ class Place(BaseModel):
                 if self.amenities
                 else []
             ),
+            "reviews": [r.id for r in self.reviews] if include_related else []
         }
 
     @classmethod
@@ -104,8 +102,8 @@ class Place(BaseModel):
         for p in cls._places:
             if p.id == place_id:
                 return p
-            return None
+        return None
         
     @classmethod
     def get_all(cls):
-        return cls.places
+        return cls._places

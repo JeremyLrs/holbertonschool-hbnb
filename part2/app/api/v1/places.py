@@ -1,6 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request
-from app.services.facade import HBnBFacade
+from app.services.facade import facade
 api = Namespace('places', description='Place operations')
 
 # Define the models for related entities
@@ -35,17 +35,19 @@ class PlaceList(Resource):
     @api.response(400, 'Invalid input data')
     def post(self):
         """Register a new place"""
-        data = request.get_json()
         try:
-            new_place = HBnBFacade().create_place(data)
+            data = request.get_json()
+            new_place = facade.create_place(data)
             return new_place.to_dict(include_related=True), 201
         except ValueError as e:
             return {'error': str(e)}, 400
+        except Exception as e:
+            return {'error': f"Unexpected error: {str(e)}"}, 400
 
     @api.response(200, 'List of places retrieved successfully')
     def get(self):
         """Retrieve a list of all places"""
-        places = HBnBFacade().get_all_places()
+        places = facade.get_all_places()
         result = []
         for place in places:
             result.append(place.to_dict(include_related=True))
@@ -58,7 +60,7 @@ class PlaceResource(Resource):
     @api.response(404, 'Place not found')
     def get(self, place_id):
         """Get place details by ID"""
-        place = HBnBFacade().get_place(place_id)
+        place = facade.get_place(place_id)
         if not place:
             return {
                 'error': f"The place with ID  {place_id} does not exist"
@@ -73,7 +75,7 @@ class PlaceResource(Resource):
         """Update a place's information"""
         data = request.get_json()
         try:
-            updated_place = HBnBFacade().update_place(place_id, data)
+            updated_place = facade.update_place(place_id, data)
             return updated_place.to_dict(include_related=True), 200
         except ValueError as e:
             return {'error': str(e)}, 400

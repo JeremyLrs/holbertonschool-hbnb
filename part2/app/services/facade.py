@@ -60,14 +60,14 @@ class HBnBFacade:
 
     def create_place(self, place_data):
         owner_id = place_data.get('owner_id')
-        owner = User.get(owner_id)
+        owner = self.user_repo.get(owner_id)
         if not owner:
             raise ValueError("Owner is not found")
         place = Place(**place_data)
 
         amenity_ids = place_data.get('amenities', [])
         for a_id in amenity_ids:
-            amenity = Amenity.get(a_id)
+            amenity = self.amenity_repo.get(a_id)
             if amenity:
                 place.amenities.append(amenity)
 
@@ -81,17 +81,22 @@ class HBnBFacade:
         return self.place_repo.get_all()
 
     def update_place(self, place_id, place_data):
-        place = Place.get(place_id)
+        place = self.place_repo.get(place_id)
         if not place:
             return None
 
         for key, value in place_data.items():
-            if hasattr(place, key):
+            if key == 'amenities':
+                new_amenities = []
+                for amenity_id in value:
+                    amenity = self.amenity_repo.get(amenity_id)
+                    if amenity:
+                        new_amenities.append(amenity)
+                place.amenities = new_amenities
+            elif hasattr(place, key):
                 setattr(place, key, value)
 
+        self.place_repo.update(place_id, place_data)
         return place
-    
-    # Placeholder for logic to update an amenity
-        pass
 
 facade = HBnBFacade()
