@@ -1,11 +1,16 @@
 from app.persistence.repository import InMemoryRepository
 <<<<<<< HEAD
+<<<<<<< HEAD
 from app.models.amenity import Amenity
 from app.models.place import Place
 =======
 >>>>>>> e1eedec (Update user-related modules and services)
+=======
+>>>>>>> 95b3e0d (Update user-related modules and services)
 from app.models.user import User
+=======
 from app.models.amenity import Amenity
+>>>>>>> 761285b (Update HBnBFacede class with method create, get, get all and update amenity)
 
 class HBnBFacade:
     def __init__(self):
@@ -53,6 +58,7 @@ class HBnBFacade:
         return self.amenity_repo.get_all()
 
     def update_amenity(self, amenity_id, amenity_data):
+<<<<<<< HEAD
         amenity = self.amenity_repo.get(amenity_id)
         if not amenity:
             return None
@@ -60,6 +66,11 @@ class HBnBFacade:
             setattr(amenity, key, value)
         self.amenity_repo.update(amenity_id, amenity_data)
         return amenity
+=======
+<<<<<<< HEAD
+    # Placeholder for logic to update an amenity
+        pass
+>>>>>>> 95b3e0d (Update user-related modules and services)
 
 <<<<<<< HEAD
     # ---------- Place ---------- #
@@ -108,6 +119,7 @@ class HBnBFacade:
 =======
 >>>>>>> e1eedec (Update user-related modules and services)
 facade = HBnBFacade()
+=======
         amenity = self.amenity_repo.get(amenity_id)
         if not amenity:
             return None
@@ -115,3 +127,5 @@ facade = HBnBFacade()
             setattr(amenity, key, value)
         self.amenity_repo.update(amenity_id, amenity_data)
         return amenity
+    
+>>>>>>> 761285b (Update HBnBFacede class with method create, get, get all and update amenity)
