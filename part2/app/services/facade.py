@@ -1,16 +1,7 @@
 from app.persistence.repository import InMemoryRepository
-<<<<<<< HEAD
-<<<<<<< HEAD
 from app.models.amenity import Amenity
 from app.models.place import Place
-=======
->>>>>>> e1eedec (Update user-related modules and services)
-=======
->>>>>>> 95b3e0d (Update user-related modules and services)
 from app.models.user import User
-=======
-from app.models.amenity import Amenity
->>>>>>> 761285b (Update HBnBFacede class with method create, get, get all and update amenity)
 
 class HBnBFacade:
     def __init__(self):
@@ -18,7 +9,6 @@ class HBnBFacade:
         self.place_repo = InMemoryRepository()
         self.review_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
-        
 
     def create_user(self, user_data):
         user = User(**user_data)
@@ -37,7 +27,17 @@ class HBnBFacade:
 
     def update_user(self, user_id, data):
         """Update a user’s information."""
-        return self.user_repo.update(user_id, data)
+        user = self.user_repo.get(user_id)
+        if not user:
+            return None  # L'utilisateur n'existe pas
+
+        try:
+            user.update(data)  # Met à jour l'objet User lui-même
+            self.user_repo.update(user_id, data)  # Persiste la mise à jour
+            return user  # 🔥 On renvoie toujours l'objet mis à jour
+        except ValueError as e:
+            # Re-propager l'erreur vers l'API pour une gestion propre (400)
+            raise e
     
     # Placeholder method for fetching a place by ID
     def get_place(self, place_id):
@@ -58,7 +58,6 @@ class HBnBFacade:
         return self.amenity_repo.get_all()
 
     def update_amenity(self, amenity_id, amenity_data):
-<<<<<<< HEAD
         amenity = self.amenity_repo.get(amenity_id)
         if not amenity:
             return None
@@ -66,13 +65,7 @@ class HBnBFacade:
             setattr(amenity, key, value)
         self.amenity_repo.update(amenity_id, amenity_data)
         return amenity
-=======
-<<<<<<< HEAD
-    # Placeholder for logic to update an amenity
-        pass
->>>>>>> 95b3e0d (Update user-related modules and services)
 
-<<<<<<< HEAD
     # ---------- Place ---------- #
 
     def create_place(self, place_data):
@@ -116,16 +109,4 @@ class HBnBFacade:
         self.place_repo.update(place_id, place_data)
         return place
 
-=======
->>>>>>> e1eedec (Update user-related modules and services)
 facade = HBnBFacade()
-=======
-        amenity = self.amenity_repo.get(amenity_id)
-        if not amenity:
-            return None
-        for key, value in amenity_data.items():
-            setattr(amenity, key, value)
-        self.amenity_repo.update(amenity_id, amenity_data)
-        return amenity
-    
->>>>>>> 761285b (Update HBnBFacede class with method create, get, get all and update amenity)
