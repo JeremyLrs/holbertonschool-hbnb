@@ -83,9 +83,11 @@ class HBnBFacade:
         owner = self.user_repo.get(owner_id)
         if not owner:
             raise ValueError("Owner is not found")
-        place = Place(**place_data)
 
-        amenity_ids = place_data.get('amenities', [])
+        amenity_ids = place_data.pop('amenities', [])
+
+        place = Place(**place_data)
+        
         for a_id in amenity_ids:
             amenity = self.amenity_repo.get(a_id)
             if amenity:
@@ -176,4 +178,3 @@ class HBnBFacade:
         return review
 
 facade = HBnBFacade()
-    
