@@ -29,7 +29,17 @@ class HBnBFacade:
 
     def update_user(self, user_id, data):
         """Update a user’s information."""
-        return self.user_repo.update(user_id, data)
+        user = self.user_repo.get(user_id)
+        if not user:
+            return None  # L'utilisateur n'existe pas
+
+        try:
+            user.update(data)  # Met à jour l'objet User lui-même
+            self.user_repo.update(user_id, data)  # Persiste la mise à jour
+            return user  # 🔥 On renvoie toujours l'objet mis à jour
+        except ValueError as e:
+            # Re-propager l'erreur vers l'API pour une gestion propre (400)
+            raise e
     
     # Placeholder method for fetching a place by ID
     def get_place(self, place_id):
@@ -48,6 +58,14 @@ class HBnBFacade:
 
     def get_all_amenities(self):
         return self.amenity_repo.get_all()
+    
+    def get_amenity_by_name(self, name: str):
+        if hasattr(self.amenity_repo, "get_by_attribute"):
+            return self.amenity_repo.get_by_attribute("name", name)
+        for obj in self.amenity_repo.get_all().values():
+            if getattr(obj, "name", None) == name:
+                return obj
+        return None
 
     def update_amenity(self, amenity_id, amenity_data):
         amenity = self.amenity_repo.get(amenity_id)
