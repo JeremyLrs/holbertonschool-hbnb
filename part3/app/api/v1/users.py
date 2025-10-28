@@ -1,5 +1,7 @@
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.services import facade
+from app import bcrypt
 
 # Create namespace
 api = Namespace('users', description='User operations')
@@ -21,13 +23,20 @@ class UserList(Resource):
     @api.response(201, 'User successfully created')
     @api.response(400, 'Email already registered')
     @api.response(400, 'Invalid input data')
+    @jwt_required(optional=True)
     def post(self):
         """Register a new user"""
         user_data = api.payload
 
+        current_user = get_jwt_identity()
+
+        #only admins can create other users with is_admin=True
+        if user_data.get("is_admin"):
+            if not current_user or not current_user.get("is_admin"):
+                return {'error': 'Admin priviliges required'}, 403
+
         # Check if email already exists
-        existing_user = facade.get_user_by_email(user_data['email'])
-        if existing_user:
+        if facade.get_user_by_email(user_data['email']):
             return {'error': 'Email already registered'}, 400
         
         from app import bcrypt
@@ -79,10 +88,25 @@ class UserResource(Resource):
     @api.response(404, 'User not found')
     def put(self, user_id):
         """Update user information"""
-        updated_user = facade.update_user(user_id, api.payload)
-        if not updated_user:
+        current_user = get_jwt_identity()
+        user = facade.get_user(user_id)
+        if not user:
             return {'error': 'User not found'}, 404
 
+        #Admins can update any user
+        #Regular users can upddate only themselves
+        if user_id != current_user["id"] and not current_user.get("is_admin"):
+            return{'error': 'Unauthorized action'}, 403
+        
+        #Regular users cannot change email/password
+        if not current_user.get("is_admin"):
+            if user.email != api.payload.get("email") or not user.verify_password(api.payload.get("password")):
+                return {'error': 'You cannot modify your email or password'}, 400
+            
+        updated_user = facade.update_user(user_id, api.payload)
+        if not updated_user:
+            return{'error': 'Invalid input data'}, 400
+        
         return {
             'id': updated_user.id,
             'first_name': updated_user.first_name,
