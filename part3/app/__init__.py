@@ -17,8 +17,7 @@ jwt = JWTManager()
 def create_app(config_class="config.DevelopmentConfig"):
     app = Flask(__name__)
     app.config.from_object(config_class)
-    
-    # ✅ CORS configuration
+ 
     CORS(app, resources={
         r"/*": {
             "origins": ["http://localhost:5000", "http://127.0.0.1:5000"],
@@ -27,7 +26,6 @@ def create_app(config_class="config.DevelopmentConfig"):
         }
     })
 
-    # ✅ Security configuration
     app.config['SECRET_KEY'] = 'super-secret-key-change-this'
     app.config['JWT_SECRET_KEY'] = app.config['SECRET_KEY']
 
@@ -37,7 +35,6 @@ def create_app(config_class="config.DevelopmentConfig"):
     api = Api(app, version='1.0', title='HBnB API',
               description='HBnB Application API', doc='/api/v1/')
 
-    # ✅ Namespaces
     api.add_namespace(users_ns, path='/api/v1/users')
     api.add_namespace(places_ns, path='/api/v1/places')
     api.add_namespace(reviews_ns, path='/api/v1/reviews')
