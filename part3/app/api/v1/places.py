@@ -1,18 +1,6 @@
 from flask_restx import Namespace, Resource, fields
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 from app.services import facade
 from flask_jwt_extended import jwt_required, get_jwt_identity
-=======
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from flask import request
-from app.services.facade import facade
->>>>>>> Stashed changes
-=======
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from flask import request
-from app.services.facade import facade
->>>>>>> Stashed changes
 
 api = Namespace('places', description='Place operations')
 
@@ -153,9 +141,6 @@ class PlaceResource(Resource):
             }
         } for review in place.reviews]
 
-        if not place:
-<<<<<<< Updated upstream
-            return {'error': 'Place not found'}, 404
         return {
             'id': place.id,
             'title': place.title,
@@ -175,20 +160,12 @@ class PlaceResource(Resource):
             'amenities': amenities,
             'reviews': reviews
         }, 200
-=======
-            return {
-                'error': f"The place with ID {place_id} does not exist"
-                }, 404
-        return place.to_dict(include_related=True), 200
->>>>>>> Stashed changes
 
-    @jwt_required()
     @api.expect(place_model)
     @api.response(200, 'Place updated successfully')
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid input data')
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
+    @api.response(403, 'Unauthorized action')
     @jwt_required()
     def put(self, place_id):
         """
@@ -261,29 +238,3 @@ class PlaceReviewList(Resource):
                 }
             })
         return reviews, 200
-=======
-=======
->>>>>>> Stashed changes
-    @api.response(403, 'Unauthorized action')
-    def put(self, place_id):
-        """Update a place's information"""
-        current_user = get_jwt_identity()
-        is_admin = current_user.get('is_admin', False)
-        user_id = current_user.get('id')
-
-        place = facade.get_place(place_id)
-        if not place:
-            return {'error': f"The place with {place_id} does not exist"}, 404
-        
-        if not is_admin and place.owner_id != user_id:
-            return {'error': 'Unauthorized action'}, 403
-        
-        data = request.get_json()
-        try:
-            updated_place = facade.update_place(place_id, data)
-            return updated_place.to_dict(include_related=True), 200
-        except ValueError as e:
-            return {'error': str(e)}, 400
-        except KeyError as e:
-            return {'error': str(e)}, 404
->>>>>>> Stashed changes
