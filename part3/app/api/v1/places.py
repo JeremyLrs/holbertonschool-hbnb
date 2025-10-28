@@ -1,6 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask import request
 
 api = Namespace('places', description='Place operations')
 
@@ -162,34 +163,39 @@ class PlaceResource(Resource):
             'amenities': amenities,
             'reviews': reviews
         }, 200
-
+    
     @api.expect(place_model)
     @api.response(200, 'Place updated successfully')
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid input data')
     @jwt_required()
     def put(self, place_id):
-        """
-        Update a place's information
-        """
-        place_data = api.payload
+        """Update a place's information"""
         current_user = get_jwt_identity()
+        is_admin = current_user.get('is_admin', False)
+        user_id = current_user.get('id')
 
         place = facade.get_place(place_id)
-        if place.owner_id != current_user["id"] and not current_user["is_admin"]:
-            return {'error': 'Unauthorized action'}, 403
-
         if not place:
-            return {'error': 'Place not found'}, 404
+            return {'error': f"The place with {place_id} does not exist"}, 404
         
-        place_data["amenities"] = [facade.get_amenity(amenity["id"]) for amenity in place_data["amenities"]]
+        if not is_admin and place.owner_id != user_id:
+            return {'error': 'Unauthorized action'}, 403
+        
+        place_data = request.get_json()
 
-        updated_place = facade.update_place(place_id, place_data)
+        if "amenities" in place_data:
+            place_data["amenities"] = [facade.get_amenity(a["id"]) for a in place_data["amenities"]]
 
-        if not updated_place:
-            return {'error': 'Invalid input data'}, 400
-
-        return {'message': 'Place updated successfully'}, 200
+        try:
+            updated_place = facade.update_place(place_id, place_data)
+            if not updated_place:
+                return {'error': 'Invalid input data'}, 400
+            return updated_place.to_dict(include_related=True), 200
+        except ValueError as e:
+            return {'error': str(e)}, 400
+        except KeyError as e:
+            return {'error': str(e)}, 404
 
     @api.response(200, 'Place deleted successfully')
     @api.response(404, 'Place not found')
