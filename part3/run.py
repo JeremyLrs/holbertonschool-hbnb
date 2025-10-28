@@ -8,10 +8,10 @@ if not facade.get_user_by_email("john.doe@example.com"):
         "first_name": "John",
         "last_name": "Doe",
         "email": "john.doe@example.com",
-        "password": "1234",  # il sera hashé automatiquement
+        "password": "1234",
         "is_admin": False
     })
-    print("👤 Utilisateur de test créé : john.doe@example.com / 1234")
+    print("User test create : john.doe@example.com / 1234")
 
 if __name__ == '__main__':
     app.run(debug=True)
