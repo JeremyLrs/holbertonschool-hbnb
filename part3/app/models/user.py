@@ -2,31 +2,31 @@ import re
 from app.models.base_model import BaseModel
 from datetime import datetime
 
+
 class User(BaseModel):
     """Class representing a user"""
-    
+
     def __init__(self, first_name, last_name, email, password=None, is_admin=False):
         super().__init__()
-        
-        # Validation
+
         if not first_name or len(first_name) > 50:
-            raise ValueError(
-                "first_name is required and must be less than 50 characters."
-            )
+            raise ValueError("first_name is required and must be less than 50 characters.")
         if not last_name or len(last_name) > 50:
-            raise ValueError(
-                "last_name is required and must be less than 50 characters."
-            )
+            raise ValueError("last_name is required and must be less than 50 characters.")
         if not self.is_valid_email(email):
             raise ValueError("Invalid email format.")
 
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
-        self.password = password
         self.is_admin = is_admin
         self.places = []
         self.reviews = []
+
+        if password:
+            self.hash_password(password)
+        else:
+            self.password = None
 
     def hash_password(self, password):
         """Hashes the password before storing it."""
@@ -55,17 +55,13 @@ class User(BaseModel):
 
     def update(self, data):
         """Update user attributes"""
-        # Update only allowed fields
         for key, value in data.items():
             if key in ['first_name', 'last_name', 'email']:
                 if key == 'email' and not self.is_valid_email(value):
                     raise ValueError("Invalid email format.")
                 if key in ['first_name', 'last_name']:
                     if not value or len(value) > 50:
-                        raise ValueError(
-                            f"{key} is required and must be less than 50 characters."
-                        )
+                        raise ValueError(f"{key} is required and must be less than 50 characters.")
                 setattr(self, key, value)
-        
-        # Update the updated_at timestamp
+
         self.updated_at = datetime.now()
