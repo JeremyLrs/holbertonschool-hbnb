@@ -1,10 +1,26 @@
+from app.models.model import BaseModel
+from sqlalchemy.orm import relationship, validates
 import re
-from app.models.base_model import BaseModel
-from datetime import datetime
+import uuid
+from app import db, bcrypt
+from app import bcrypt
+
+regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
 
 
 class User(BaseModel):
     """Class representing a user"""
+    __tablename__ = 'users'
+    
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique=True)
+    password = db.Column(db.String(128), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+
+    # Relationships
+    places = db.relationship('Place', back_populates='owner', passive_deletes=True, lazy=True)
+    reviews = db.relationship('Review', back_populates='user', passive_deletes=True, lazy=True)
 
     def __init__(self, first_name, last_name, email, password=None, is_admin=False):
         super().__init__()
@@ -30,12 +46,10 @@ class User(BaseModel):
 
     def hash_password(self, password):
         """Hashes the password before storing it."""
-        from app import bcrypt
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def verify_password(self, password):
         """Verifies if the provided password matches the hashed password."""
-        from app import bcrypt
         return bcrypt.check_password_hash(self.password, password)
 
     def is_valid_email(self, email):

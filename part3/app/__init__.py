@@ -41,6 +41,6 @@ def create_app(config_class="config.DevelopmentConfig"):
     api.add_namespace(amenities_ns, path='/api/v1/amenities')
     api.add_namespace(auth_ns, path='/api/v1/auth')
 
-    print("✅ Namespaces enregistrés :", [ns.name for ns in api.namespaces])
+    print("Namespaces :", [ns.name for ns in api.namespaces])
 
     return app
