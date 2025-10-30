@@ -4,7 +4,6 @@ from app.services.facade import facade
 
 api = Namespace('auth', description='Authentication operations')
 
-# ✅ Modèle Swagger pour valider l’entrée utilisateur
 login_model = api.model('Login', {
     'email': fields.String(required=True, description='User email'),
     'password': fields.String(required=True, description='User password')
