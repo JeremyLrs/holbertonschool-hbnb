@@ -1,8 +1,10 @@
 import re
 import uuid
+from app import db, bcrypt
 from datetime import datetime
 from app.models.base_model import BaseModel
 
+regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
 
 class User(BaseModel):
     """Class representing a user (Task 5 — no SQLAlchemy mapping yet)."""
