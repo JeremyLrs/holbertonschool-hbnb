@@ -1,4 +1,5 @@
-from app.persistence.repository import SQLAlchemyRepository, InMemoryRepository
+from app.persistence.repository import InMemoryRepository
+from app.persistence.sqlalchemy_repository import SQLAlchemyRepository
 from app.models.user import User
 from app.models.amenity import Amenity
 from app.models.place import Place
@@ -12,7 +13,7 @@ class HBnBFacade:
         users, places, reviews, and amenities.
         """
 
-        self.user_repo = InMemoryRepository()
+        self.user_repo = SQLAlchemyRepository(User)
         self.place_repo = InMemoryRepository()
         self.review_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
@@ -38,19 +39,16 @@ class HBnBFacade:
         """Update a user’s information."""
         user = self.user_repo.get(user_id)
         if not user:
-            return None  # L'utilisateur n'existe pas
+            return None
 
         try:
-            user.update(data)  # Met à jour l'objet User lui-même
-            self.user_repo.update(user_id, data)  # Persiste la mise à jour
-            return user  # 🔥 On renvoie toujours l'objet mis à jour
+            user.update(data)
+            self.user_repo.update(user_id, data)
+            return user
         except ValueError as e:
-            # Re-propager l'erreur vers l'API pour une gestion propre (400)
             raise e
     
-    # Placeholder method for fetching a place by ID
     def get_place(self, place_id):
-        # Logic will be implemented in later tasks
         pass
 
     # ---------- Amenity ---------- #

@@ -1,29 +1,35 @@
-from app import db
 import uuid
 from datetime import datetime
 
 
+class BaseModel:
+    """Base class for all models"""
 
-class BaseModel(db.Model):
-    __abstract__ = True
-
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
+    def __init__(self, *args, **kwargs):
+        from app import db
+        self.__abstract__ = True
+        self.id = kwargs.get("id", str(uuid.uuid4()))
+        self.created_at = kwargs.get("created_at", datetime.utcnow())
+        self.updated_at = kwargs.get("updated_at", datetime.utcnow())
 
     def save(self):
-        """Update the updated_at timestamp
-        whenever the object is modified"""
-        self.updated_at = datetime.now()
+        from app import db
+        self.updated_at = datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()
 
     def update(self, data):
-        """Update the attributes of the object
-        based on the provided dictionary"""
+        from app import db
         for key, value in data.items():
             if hasattr(self, key):
                 setattr(self, key, value)
-        self.save()
+        self.updated_at = datetime.utcnow()
+        db.session.commit()
+
+    def delete(self):
+        from app import db
+        db.session.delete(self)
+        db.session.commit()
 
     def __repr__(self):
         return f"<{self.__class__.__name__} id={self.id}>"
