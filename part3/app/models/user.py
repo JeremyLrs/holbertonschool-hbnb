@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship, validates
 import re
 import uuid
 from app import db, bcrypt
-from app import bcrypt
 
 regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
 
