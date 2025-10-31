@@ -1,9 +1,9 @@
-from app.persistence.repository import InMemoryRepository
 from app.persistence.sqlalchemy_repository import SQLAlchemyRepository
 from app.models.user import User
 from app.models.amenity import Amenity
 from app.models.place import Place
 from app.models.review import Review
+
 
 class HBnBFacade:
     """Facade class to manage users, places, reviews, and amenities."""
@@ -14,9 +14,9 @@ class HBnBFacade:
         """
 
         self.user_repo = SQLAlchemyRepository(User)
-        self.place_repo = InMemoryRepository()
-        self.review_repo = InMemoryRepository()
-        self.amenity_repo = InMemoryRepository()
+        self.place_repo = SQLAlchemyRepository(Place)
+        self.review_repo = SQLAlchemyRepository(Review)
+        self.amenity_repo = SQLAlchemyRepository(Amenity)
 
     # ---------- User ---------- #
 
@@ -24,13 +24,13 @@ class HBnBFacade:
         user = User(**user_data)
         self.user_repo.add(user)
         return user
-    
+
     def get_user(self, user_id):
         return self.user_repo.get(user_id)
 
     def get_user_by_email(self, email):
         return self.user_repo.get_by_attribute('email', email)
-    
+
     def get_all_users(self):
         """Retrieve all users."""
         return self.user_repo.get_all()
@@ -42,14 +42,10 @@ class HBnBFacade:
             return None
 
         try:
-            user.update(data)
-            self.user_repo.update(user_id, data)
-            return user
+            updated_user = self.user_repo.update(user_id, data)
+            return updated_user
         except ValueError as e:
             raise e
-    
-    def get_place(self, place_id):
-        pass
 
     # ---------- Amenity ---------- #
 
@@ -63,11 +59,11 @@ class HBnBFacade:
 
     def get_all_amenities(self):
         return self.amenity_repo.get_all()
-    
+
     def get_amenity_by_name(self, name: str):
         if hasattr(self.amenity_repo, "get_by_attribute"):
             return self.amenity_repo.get_by_attribute("name", name)
-        for obj in self.amenity_repo.get_all().values():
+        for obj in self.amenity_repo.get_all():
             if getattr(obj, "name", None) == name:
                 return obj
         return None
@@ -92,7 +88,7 @@ class HBnBFacade:
         amenity_ids = place_data.pop('amenities', [])
 
         place = Place(**place_data)
-        
+
         for a_id in amenity_ids:
             amenity = self.amenity_repo.get(a_id)
             if amenity:
@@ -125,18 +121,18 @@ class HBnBFacade:
 
         self.place_repo.update(place_id, place_data)
         return place
-    
+
     # ---------- Reviews ---------- #
 
     def create_review(self, review_data):
         user = self.user_repo.get(review_data.get('user_id'))
         if not user:
             raise ValueError("Place not found")
-        
+
         place = self.place_repo.get(review_data.get('place_id'))
         if not place:
             raise ValueError("Place not found")
-        
+
         review = Review(
             text=review_data.get('text'),
             rating=review_data.get('rating'),
@@ -145,7 +141,7 @@ class HBnBFacade:
         )
         self.review_repo.add(review)
         return review
-        
+
     def get_review(self, review_id):
         return self.review_repo.get(review_id)
 
@@ -166,7 +162,7 @@ class HBnBFacade:
         review = self.review_repo.get(review_id)
         if not review:
             return None
-        
+
         if 'text' in review_data:
             review.text = review_data['text']
         if 'rating' in review_data:
@@ -181,5 +177,6 @@ class HBnBFacade:
             return None
         self.review_repo.delete(review_id)
         return review
+
 
 facade = HBnBFacade()

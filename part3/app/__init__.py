@@ -5,11 +5,6 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from app.config import DevelopmentConfig
-from app.api.v1.users import api as users_ns
-from app.api.v1.places import api as places_ns
-from app.api.v1.reviews import api as reviews_ns
-from app.api.v1.amenities import api as amenities_ns
-from app.api.v1.auth import api as auth_ns
 
 
 bcrypt = Bcrypt()
@@ -20,7 +15,7 @@ db = SQLAlchemy()
 def create_app(config_class="app.config.DevelopmentConfig"):
     app = Flask(__name__)
     app.config.from_object(config_class)
- 
+
     CORS(app, resources={
         r"/*": {
             "origins": ["http://localhost:5000", "http://127.0.0.1:5000"],
@@ -35,6 +30,12 @@ def create_app(config_class="app.config.DevelopmentConfig"):
     bcrypt.init_app(app)
     jwt.init_app(app)
     db.init_app(app)
+
+    from app.api.v1.users import api as users_ns
+    from app.api.v1.places import api as places_ns
+    from app.api.v1.reviews import api as reviews_ns
+    from app.api.v1.amenities import api as amenities_ns
+    from app.api.v1.auth import api as auth_ns
 
     api = Api(app, version='1.0', title='HBnB API',
               description='HBnB Application API', doc='/api/v1/')
