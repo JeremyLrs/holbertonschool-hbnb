@@ -1,11 +1,22 @@
-from .base_model import BaseModel
+import uuid
+from app import db
 from datetime import datetime
 
 
-class Place(BaseModel):
-    def __init__(
-            self, title, description, price, latitude,
-            longitude,owner_id, amenities=None):
+class Place(db.Model):
+    __tablename__ = "places"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    title = db.Column(db.String(128), nullable=False)
+    description = db.Column(db.String(512))
+    price = db.Column(db.Float)
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __init__(self, title, description, price, latitude,
+                 longitude, owner_id, amenities=None):
         super().__init__()
 
         # main fields
@@ -103,7 +114,7 @@ class Place(BaseModel):
             if p.id == place_id:
                 return p
         return None
-        
+
     @classmethod
     def get_all(cls):
         return cls._places

@@ -1,43 +1,34 @@
 import re
 import uuid
+from app import db, bcrypt
 from datetime import datetime
 from app.models.base_model import BaseModel
 
+regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
 
 class User(BaseModel):
     """Class representing a user (Task 5 — no SQLAlchemy mapping yet)."""
 
-    def __init__(self, first_name, last_name, email, password=None, is_admin=False):
-        super().__init__()
+    __tablename__ = 'users'
 
-        if not first_name or len(first_name) > 50:
-            raise ValueError("first_name is required and must be less than 50 characters.")
-        if not last_name or len(last_name) > 50:
-            raise ValueError("last_name is required and must be less than 50 characters.")
-        if not self.is_valid_email(email):
-            raise ValueError("Invalid email format.")
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique=True)
+    password = db.Column(db.String(128), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
 
-        self.id = str(uuid.uuid4())
-        self.first_name = first_name
-        self.last_name = last_name
-        self.email = email
-        self.is_admin = is_admin
-        self.places = []
-        self.reviews = []
-
-        if password:
-            self.hash_password(password)
-        else:
-            self.password = None
+    # Relationships
+    places = db.relationship('Place', back_populates='owner', passive_deletes=True, lazy=True)
+    reviews = db.relationship('Review', back_populates='user', passive_deletes=True, lazy=True)
 
     def hash_password(self, password):
         """Hashes the password before storing it."""
-        from app import bcrypt  # ✅ import local to avoid circular import
+        from app import bcrypt 
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def verify_password(self, password):
         """Verifies if the provided password matches the hashed password."""
-        from app import bcrypt  # ✅ import local to avoid circular import
+        from app import bcrypt 
         return bcrypt.check_password_hash(self.password, password)
 
     def is_valid_email(self, email):
