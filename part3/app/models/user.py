@@ -24,9 +24,14 @@ class User(BaseModel, db.Model):
     def __init__(self, *args, **kwargs):
         """Initialize the user, ensuring valid email and hashed password."""
         super().__init__(*args, **kwargs)
+
+        for key, value in kwargs.items():
+            if hasattr(self,key):
+                setattr(self,key,value)
+                
         if 'email' in kwargs and not self.is_valid_email(kwargs['email']):
             raise ValueError("Invalid email format.")
-        if 'password' in kwargs:
+        if 'password' in kwargs and kwargs['password']:
             self.hash_password(kwargs['password'])
 
     def hash_password(self, password):
