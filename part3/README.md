@@ -200,6 +200,6 @@ erDiagram
 
 ## 👷🏼‍♂️👷🏼‍♂️👷🏼‍♂️ Authors
 
-**Christophe Barrère**
-**Malik Bouanani**
-**Jérémy LAURENS**
+- **Christophe Barrère**
+- **Malik Bouanani**
+- **Jérémy Laurens**
