@@ -4,7 +4,8 @@ from datetime import datetime
 from app import db, bcrypt
 from app.models.base_model import BaseModel
 
-class User(BaseModel, db.Model):
+
+class User(db.Model, BaseModel):
     """User model with SQLAlchemy mapping and validation."""
 
     __tablename__ = 'users'
@@ -21,57 +22,51 @@ class User(BaseModel, db.Model):
     places = db.relationship('Place', back_populates='owner', cascade='all, delete-orphan')
     reviews = db.relationship('Review', back_populates='author', cascade='all, delete-orphan')
 
-    def __init__(self, *args, **kwargs):
-        """Initialize the user, ensuring valid email and hashed password."""
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+
+        if 'first_name' not in kwargs and 'email' not in kwargs:
+            raise ValueError("User must be created with valid data")
+
+        super().__init__(**kwargs)
+
         if 'email' in kwargs and not self.is_valid_email(kwargs['email']):
             raise ValueError("Invalid email format.")
+
         if 'password' in kwargs:
             self.hash_password(kwargs['password'])
 
     def hash_password(self, password):
-        """Hashes the password before storing it."""
+        """Hash password before storing."""
         if password:
             self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def verify_password(self, password):
-        """Verifies if the provided password matches the hashed password."""
+        """Check password."""
         return bcrypt.check_password_hash(self.password, password)
 
     def is_valid_email(self, email):
-        """Validates email format using regex."""
+        """Very basic email format validation."""
         pattern = r"^[\w\.-]+@[\w\.-]+\.\w+$"
         return re.match(pattern, email) is not None
 
     def add_place(self, place):
-        """Adds a place to the user's list of places."""
         if place not in self.places:
             self.places.append(place)
 
     def add_review(self, review):
-        """Adds a review to the user's list of reviews."""
         if review not in self.reviews:
             self.reviews.append(review)
 
     def update(self, data):
-        """Safely update user attributes."""
+        """Update allowed user fields."""
         for key, value in data.items():
             if key in ['first_name', 'last_name', 'email']:
                 if key == 'email' and not self.is_valid_email(value):
                     raise ValueError("Invalid email format.")
-                if key in ['first_name', 'last_name']:
-                    if not value or len(value) > 50:
-                        raise ValueError(f"{key} is required and must be less than 50 characters.")
                 setattr(self, key, value)
+
         self.updated_at = datetime.utcnow()
         db.session.commit()
-
-    def to_dict(self):
-        """Serialize user instance to dictionary (excluding password)."""
-        user_dict = super().to_dict()
-        if 'password' in user_dict:
-            del user_dict['password']
-        return user_dict
 
     def __repr__(self):
         return f"<User {self.email} (Admin={self.is_admin})>"
